@@ -1,0 +1,15 @@
+# Database
+spring.datasource.url=
+spring.datasource.username=
+spring.datasource.password=
+spring.datasource.driver-class-name=
+
+# Hibernate
+spring.jpa.show-sql=
+spring.jpa.hibernate.ddl-auto=
+spring.jpa.properties.hibernate.dialect=
+spring.jpa.properties.hibernate.temp.use_jdbc_metadata_defaults=
+
+# JWT
+jwt.secret=
+jwt.expiration=
