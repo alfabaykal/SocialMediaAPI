@@ -11,7 +11,7 @@ public interface UserService {
 
     List<UserDto> getAllUsers();
 
-    Long getIdByUsername(String username);
+    Long getUserIdByUsername(String username);
 
     Optional<UserDto> getUserById(Long id);
 

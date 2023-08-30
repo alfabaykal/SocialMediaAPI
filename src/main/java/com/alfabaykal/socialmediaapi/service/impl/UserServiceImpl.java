@@ -30,7 +30,7 @@ public class UserServiceImpl implements UserService {
                 .map(entityDtoConverter::convertUserToUserDto).toList();
     }
 
-    public Long getIdByUsername(String username) {
+    public Long getUserIdByUsername(String username) {
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> new UserNotFoundException(username)).getId();
     }

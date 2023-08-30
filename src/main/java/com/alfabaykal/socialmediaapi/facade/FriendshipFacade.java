@@ -1,6 +1,6 @@
-package com.alfabaykal.socialmediaapi.service;
+package com.alfabaykal.socialmediaapi.facade;
 
-public interface FriendshipService {
+public interface FriendshipFacade {
 
     void sendFriendRequest(Long senderId, Long receiverId);
 

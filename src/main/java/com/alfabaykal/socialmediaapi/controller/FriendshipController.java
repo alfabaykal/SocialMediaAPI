@@ -1,7 +1,7 @@
 package com.alfabaykal.socialmediaapi.controller;
 
+import com.alfabaykal.socialmediaapi.facade.FriendshipFacade;
 import com.alfabaykal.socialmediaapi.security.JwtUtil;
-import com.alfabaykal.socialmediaapi.service.FriendshipService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -12,11 +12,11 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/v1/friendship")
 public class FriendshipController {
 
-    private final FriendshipService friendshipService;
+    private final FriendshipFacade friendshipFacade;
     private final JwtUtil jwtUtil;
 
-    public FriendshipController(FriendshipService friendshipService, JwtUtil jwtUtil) {
-        this.friendshipService = friendshipService;
+    public FriendshipController(FriendshipFacade friendshipFacade, JwtUtil jwtUtil) {
+        this.friendshipFacade = friendshipFacade;
         this.jwtUtil = jwtUtil;
     }
 
@@ -26,7 +26,7 @@ public class FriendshipController {
                                   @RequestHeader("Authorization") String jwtHeader,
                                   @Parameter(description = "Идентификатор получателя")
                                   @PathVariable Long receiverId) {
-        friendshipService.sendFriendRequest(jwtUtil.getUserIdByJwtHeader(jwtHeader), receiverId);
+        friendshipFacade.sendFriendRequest(jwtUtil.getUserIdByJwtHeader(jwtHeader), receiverId);
     }
 
     @Operation(summary = "Принятие запроса на добавление в друзья")
@@ -35,7 +35,7 @@ public class FriendshipController {
                                     @RequestHeader("Authorization") String jwtHeader,
                                     @Parameter(description = "Идентификатор отправителя")
                                     @PathVariable Long senderId) {
-        friendshipService.acceptFriendRequest(senderId, jwtUtil.getUserIdByJwtHeader(jwtHeader));
+        friendshipFacade.acceptFriendRequest(senderId, jwtUtil.getUserIdByJwtHeader(jwtHeader));
     }
 
     @Operation(summary = "Отклонение запроса на добавление в друзья")
@@ -44,7 +44,7 @@ public class FriendshipController {
                                      @RequestHeader("Authorization") String jwtHeader,
                                      @Parameter(description = "Идентификатор отправителя")
                                      @PathVariable Long senderId) {
-        friendshipService.declineFriendRequest(senderId, jwtUtil.getUserIdByJwtHeader(jwtHeader));
+        friendshipFacade.declineFriendRequest(senderId, jwtUtil.getUserIdByJwtHeader(jwtHeader));
     }
 
     @Operation(summary = "Удаление пользователя из списка друзей")
@@ -53,7 +53,7 @@ public class FriendshipController {
                              @RequestHeader("Authorization") String jwtHeader,
                              @Parameter(description = "Идентификатор отправителя")
                              @PathVariable Long senderId) {
-        friendshipService.removeFriend(jwtUtil.getUserIdByJwtHeader(jwtHeader), senderId);
+        friendshipFacade.removeFriend(jwtUtil.getUserIdByJwtHeader(jwtHeader), senderId);
     }
 
 }
