@@ -1,26 +1,27 @@
 package com.alfabaykal.socialmediaapi.service.impl;
 
-import com.alfabaykal.socialmediaapi.dto.UserRelationshipDto;
 import com.alfabaykal.socialmediaapi.exception.RepeatedFriendshipRequestException;
 import com.alfabaykal.socialmediaapi.exception.UserNotFoundException;
+import com.alfabaykal.socialmediaapi.model.User;
 import com.alfabaykal.socialmediaapi.service.FriendshipService;
+import com.alfabaykal.socialmediaapi.service.UserService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class FriendshipServiceImpl implements FriendshipService {
 
-    private final UserServiceImpl userServiceImpl;
+    private final UserService userService;
 
-    public FriendshipServiceImpl(UserServiceImpl userServiceImpl) {
-        this.userServiceImpl = userServiceImpl;
+    public FriendshipServiceImpl(UserService userService) {
+        this.userService = userService;
     }
 
     @Transactional
     public void sendFriendRequest(Long senderId, Long receiverId) {
-        UserRelationshipDto sender = userServiceImpl.getUserByIdWithSubscriptionsAndSentFriendRequests(senderId)
+        User sender = userService.getUserByIdWithSubscriptionsAndSentFriendRequests(senderId)
                 .orElseThrow(() -> new UserNotFoundException(senderId));
-        UserRelationshipDto receiver = userServiceImpl.getUserByIdWithSubscribersAndReceivedFriendRequests(receiverId)
+        User receiver = userService.getUserByIdWithSubscribersAndReceivedFriendRequests(receiverId)
                 .orElseThrow(() -> new UserNotFoundException(receiverId));
 
         if (sender.getSentFriendRequests().contains(receiver)) {
@@ -30,15 +31,15 @@ public class FriendshipServiceImpl implements FriendshipService {
         sender.getSubscriptions().add(receiver);
         sender.getSentFriendRequests().add(receiver);
 
-        userServiceImpl.save(sender);
+        userService.save(sender);
 
     }
 
     @Transactional
     public void acceptFriendRequest(Long senderId, Long receiverId) {
-        UserRelationshipDto sender = userServiceImpl.getUserByIdWithSubscribersAndSentFriendRequestsAndFriends(senderId)
+        User sender = userService.getUserByIdWithSubscribersAndSentFriendRequestsAndFriends(senderId)
                 .orElseThrow(() -> new UserNotFoundException(senderId));
-        UserRelationshipDto receiver = userServiceImpl.getUserByIdWithSubscriptionsAndReceivedFriendRequestsAndFriends(receiverId)
+        User receiver = userService.getUserByIdWithSubscriptionsAndReceivedFriendRequestsAndFriends(receiverId)
                 .orElseThrow(() -> new UserNotFoundException(receiverId));
 
         sender.getSubscribers().add(receiver);
@@ -47,30 +48,30 @@ public class FriendshipServiceImpl implements FriendshipService {
 
         receiver.getFriends().add(sender);
 
-        userServiceImpl.save(sender);
-        userServiceImpl.save(receiver);
+        userService.save(sender);
+        userService.save(receiver);
 
     }
 
     @Transactional
     public void declineFriendRequest(Long senderId, Long receiverId) {
-        UserRelationshipDto sender = userServiceImpl.getUserByIdWithSentFriendRequests(senderId)
+        User sender = userService.getUserByIdWithSentFriendRequests(senderId)
                 .orElseThrow(() -> new UserNotFoundException(senderId));
-        UserRelationshipDto receiver = userServiceImpl.getUserByIdWithReceivedFriendRequests(receiverId)
+        User receiver = userService.getUserByIdWithReceivedFriendRequests(receiverId)
                 .orElseThrow(() -> new UserNotFoundException(receiverId));
 
         sender.getSentFriendRequests().remove(receiver);
         receiver.getReceivedFriendRequests().remove(sender);
 
-        userServiceImpl.save(sender);
-        userServiceImpl.save(receiver);
+        userService.save(sender);
+        userService.save(receiver);
     }
 
     @Transactional
     public void removeFriend(Long userId, Long friendToBeRemovedId) {
-        UserRelationshipDto user = userServiceImpl.getUserByIdWithSubscriptionsAndFriends(userId)
+        User user = userService.getUserByIdWithSubscriptionsAndFriends(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
-        UserRelationshipDto friendToBeRemoved = userServiceImpl.getUserByIdWithFriends(friendToBeRemovedId)
+        User friendToBeRemoved = userService.getUserByIdWithFriends(friendToBeRemovedId)
                 .orElseThrow(() -> new UserNotFoundException(friendToBeRemovedId));
 
         user.getFriends().remove(friendToBeRemoved);
@@ -78,8 +79,8 @@ public class FriendshipServiceImpl implements FriendshipService {
 
         friendToBeRemoved.getFriends().remove(user);
 
-        userServiceImpl.save(user);
-        userServiceImpl.save(friendToBeRemoved);
+        userService.save(user);
+        userService.save(friendToBeRemoved);
     }
 
 }

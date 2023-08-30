@@ -38,4 +38,10 @@ public class ChatRequest {
         createdAt = LocalDateTime.now();
     }
 
+    public ChatRequest(User sender, User receiver, Chat chat) {
+        this.sender = sender;
+        this.receiver = receiver;
+        this.chat = chat;
+    }
+
 }

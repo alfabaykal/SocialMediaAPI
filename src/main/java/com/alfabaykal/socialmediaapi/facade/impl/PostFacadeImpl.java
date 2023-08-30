@@ -5,6 +5,7 @@ import com.alfabaykal.socialmediaapi.dto.UserDto;
 import com.alfabaykal.socialmediaapi.facade.PostFacade;
 import com.alfabaykal.socialmediaapi.service.PostService;
 import com.alfabaykal.socialmediaapi.service.UserService;
+import com.alfabaykal.socialmediaapi.util.EntityDtoConverter;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -17,40 +18,48 @@ public class PostFacadeImpl implements PostFacade {
 
     private final PostService postService;
     private final UserService userService;
+    private final EntityDtoConverter entityDtoConverter;
 
-    public PostFacadeImpl(PostService postService, UserService userService) {
+    public PostFacadeImpl(PostService postService, UserService userService, EntityDtoConverter entityDtoConverter) {
         this.postService = postService;
         this.userService = userService;
+        this.entityDtoConverter = entityDtoConverter;
     }
 
     @Override
     public List<PostDto> getAllPosts() {
-        return postService.getAllPosts();
+        return postService.getAllPosts().stream()
+                .map(entityDtoConverter::convertPostToPostDto).toList();
     }
 
     @Override
     public List<PostDto> getPostsByAuthor(Long userId, Pageable pageable) {
-        return postService.getPostsByAuthor(userId, pageable);
+        return postService.getPostsByAuthor(userId, pageable).stream()
+                .map(entityDtoConverter::convertPostToPostDto).toList();
     }
 
     @Override
     public Page<PostDto> getFeed(Long userId, Pageable pageable) {
-        return postService.getFeed(userId, pageable);
+        return postService.getFeed(userId, pageable)
+                .map(entityDtoConverter::convertPostToPostDto);
     }
 
     @Override
     public Optional<PostDto> getPostDtoById(Long postId) {
-        return postService.getPostDtoById(postId);
+        return postService.getPostById(postId)
+                .map(entityDtoConverter::convertPostToPostDto);
     }
 
     @Override
     public PostDto createPost(PostDto postDto) {
-        return postService.createPost(postDto);
+        return entityDtoConverter
+                .convertPostToPostDto(postService.createPost(entityDtoConverter.convertPostDtoToPost(postDto)));
     }
 
     @Override
     public PostDto updatePost(Long postId, PostDto postDto) {
-        return postService.updatePost(postId, postDto);
+        return entityDtoConverter
+                .convertPostToPostDto(postService.updatePost(postId, entityDtoConverter.convertPostDtoToPost(postDto)));
     }
 
     @Override
@@ -60,6 +69,6 @@ public class PostFacadeImpl implements PostFacade {
 
     @Override
     public Optional<UserDto> getUserById(Long id) {
-        return userService.getUserById(id);
+        return userService.getUserById(id).map(entityDtoConverter::convertUserToUserDto);
     }
 }

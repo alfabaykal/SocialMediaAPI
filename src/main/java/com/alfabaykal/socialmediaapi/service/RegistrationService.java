@@ -1,9 +1,9 @@
 package com.alfabaykal.socialmediaapi.service;
 
-import com.alfabaykal.socialmediaapi.dto.UserRegistrationDto;
+import com.alfabaykal.socialmediaapi.model.User;
 
 public interface RegistrationService {
 
-    void register(UserRegistrationDto userRegistrationDto);
+    void register(User user);
 
 }

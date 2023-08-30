@@ -1,6 +1,6 @@
 package com.alfabaykal.socialmediaapi.service;
 
-import com.alfabaykal.socialmediaapi.dto.PostDto;
+import com.alfabaykal.socialmediaapi.model.Post;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -9,17 +9,17 @@ import java.util.Optional;
 
 public interface PostService {
 
-    List<PostDto> getAllPosts();
+    List<Post> getAllPosts();
 
-    List<PostDto> getPostsByAuthor(Long userId, Pageable pageable);
+    List<Post> getPostsByAuthor(Long userId, Pageable pageable);
 
-    Page<PostDto> getFeed(Long userId, Pageable pageable);
+    Page<Post> getFeed(Long userId, Pageable pageable);
 
-    Optional<PostDto> getPostDtoById(Long postId);
+    Optional<Post> getPostById(Long postId);
 
-    PostDto createPost(PostDto postDto);
+    Post createPost(Post post);
 
-    PostDto updatePost(Long postId, PostDto postDto);
+    Post updatePost(Long postId, Post post);
 
     void deletePost(Long postId);
 
