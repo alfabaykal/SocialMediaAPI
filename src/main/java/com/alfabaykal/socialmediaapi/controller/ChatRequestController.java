@@ -2,8 +2,8 @@ package com.alfabaykal.socialmediaapi.controller;
 
 import com.alfabaykal.socialmediaapi.dto.ChatRequestResponseDto;
 import com.alfabaykal.socialmediaapi.dto.ChatRequestInitiationDto;
+import com.alfabaykal.socialmediaapi.facade.ChatRequestFacade;
 import com.alfabaykal.socialmediaapi.security.JwtUtil;
-import com.alfabaykal.socialmediaapi.service.ChatRequestService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -14,11 +14,11 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/v1/chat_requests")
 public class ChatRequestController {
 
-    private final ChatRequestService chatRequestService;
+    private final ChatRequestFacade chatRequestFacade;
     private final JwtUtil jwtUtil;
 
-    public ChatRequestController(ChatRequestService chatRequestService, JwtUtil jwtUtil) {
-        this.chatRequestService = chatRequestService;
+    public ChatRequestController(ChatRequestFacade chatRequestFacade, JwtUtil jwtUtil) {
+        this.chatRequestFacade = chatRequestFacade;
         this.jwtUtil = jwtUtil;
     }
 
@@ -27,7 +27,7 @@ public class ChatRequestController {
     public void sendChatRequest(@Parameter(description = "Bearer header with JWT")
                                 @RequestHeader("Authorization") String jwtHeader,
                                 @RequestBody ChatRequestInitiationDto chatRequestInitiationDto) {
-        chatRequestService.sendChatRequest(jwtUtil.getUserIdByJwtHeader(jwtHeader),
+        chatRequestFacade.sendChatRequest(jwtUtil.getUserIdByJwtHeader(jwtHeader),
                 chatRequestInitiationDto.getReceiverId(), null);
     }
 
@@ -38,7 +38,7 @@ public class ChatRequestController {
                                 @RequestBody ChatRequestInitiationDto chatRequestInitiationDto,
                                 @Parameter(description = "Идентификатор чата")
                                 @PathVariable Long chatId) {
-        chatRequestService.sendChatRequest(jwtUtil.getUserIdByJwtHeader(jwtHeader),
+        chatRequestFacade.sendChatRequest(jwtUtil.getUserIdByJwtHeader(jwtHeader),
                 chatRequestInitiationDto.getReceiverId(), chatId);
     }
 
@@ -47,7 +47,7 @@ public class ChatRequestController {
     public void acceptChatRequest(@Parameter(description = "Bearer header with JWT")
                                   @RequestHeader("Authorization") String jwtHeader,
                                   @RequestBody ChatRequestResponseDto chatRequestResponseDto) {
-        chatRequestService.acceptChatRequest(chatRequestResponseDto.getChatRequestId(),
+        chatRequestFacade.acceptChatRequest(chatRequestResponseDto.getChatRequestId(),
                 jwtUtil.getUserIdByJwtHeader(jwtHeader));
     }
 
@@ -56,6 +56,6 @@ public class ChatRequestController {
     public void declineChatRequest(@Parameter(description = "Bearer header with JWT")
                                    @RequestHeader("Authorization") String jwtHeader,
                                    @RequestBody ChatRequestResponseDto chatRequestResponseDto) {
-        chatRequestService.declineChatRequest(chatRequestResponseDto.getChatRequestId(), jwtUtil.getUserIdByJwtHeader(jwtHeader));
+        chatRequestFacade.declineChatRequest(chatRequestResponseDto.getChatRequestId(), jwtUtil.getUserIdByJwtHeader(jwtHeader));
     }
 }

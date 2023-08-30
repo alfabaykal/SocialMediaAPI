@@ -3,9 +3,8 @@ package com.alfabaykal.socialmediaapi.controller;
 import com.alfabaykal.socialmediaapi.dto.PostDeleteDto;
 import com.alfabaykal.socialmediaapi.dto.PostDto;
 import com.alfabaykal.socialmediaapi.exception.*;
+import com.alfabaykal.socialmediaapi.facade.PostFacade;
 import com.alfabaykal.socialmediaapi.security.JwtUtil;
-import com.alfabaykal.socialmediaapi.service.PostService;
-import com.alfabaykal.socialmediaapi.service.UserService;
 import com.alfabaykal.socialmediaapi.util.BindingResultConverter;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
@@ -26,25 +25,22 @@ import java.util.List;
 @RequestMapping("/v1/posts")
 public class PostController {
 
-    private final PostService postService;
+    private final PostFacade postFacade;
     private final BindingResultConverter bindingResultConverter;
     private final JwtUtil jwtUtil;
-    private final UserService userService;
 
-    public PostController(PostService postService,
+    public PostController(PostFacade postFacade,
                           BindingResultConverter bindingResultConverter,
-                          JwtUtil jwtUtil,
-                          UserService userService) {
-        this.postService = postService;
+                          JwtUtil jwtUtil) {
+        this.postFacade = postFacade;
         this.bindingResultConverter = bindingResultConverter;
         this.jwtUtil = jwtUtil;
-        this.userService = userService;
     }
 
     @Operation(summary = "Получение всех постов")
     @GetMapping
     public List<PostDto> getAllPosts() {
-        return postService.getAllPosts();
+        return postFacade.getAllPosts();
     }
 
     @Operation(summary = "Просмотр постов за авторством определенного пользователя")
@@ -53,7 +49,7 @@ public class PostController {
                                           @PathVariable Long userId,
                                           @PageableDefault(size = 5, sort = "createdAt",
                                                   direction = Sort.Direction.DESC) Pageable pageable) {
-        return postService.getPostsByAuthor(userId, pageable);
+        return postFacade.getPostsByAuthor(userId, pageable);
     }
 
     @Operation(summary = "Просмотр постов авторов, на которых подписан")
@@ -62,14 +58,14 @@ public class PostController {
                                         @RequestHeader("Authorization") String jwtHeader,
                                         @PageableDefault(size = 5, sort = "createdAt",
                                                 direction = Sort.Direction.DESC) Pageable pageable) {
-        return postService.getFeed(jwtUtil.getUserIdByJwtHeader(jwtHeader), pageable);
+        return postFacade.getFeed(jwtUtil.getUserIdByJwtHeader(jwtHeader), pageable);
     }
 
     @Operation(summary = "Получение поста по идентификатору")
     @GetMapping("/{postId}")
     public PostDto getPostById(@Parameter(description = "Идентификатор поста")
                                @PathVariable Long postId) {
-        return postService.getPostDtoById(postId)
+        return postFacade.getPostDtoById(postId)
                 .orElseThrow(() -> new PostNotFoundException(postId));
     }
 
@@ -86,10 +82,10 @@ public class PostController {
 
         Long authorId = jwtUtil.getUserIdByJwtHeader(jwtHeader);
 
-        postDto.setAuthor(userService.getUserById(authorId)
+        postDto.setAuthor(postFacade.getUserById(authorId)
                 .orElseThrow(() -> new UserNotFoundException(authorId)));
 
-        return postService.createPost(postDto);
+        return postFacade.createPost(postDto);
     }
 
     @Operation(summary = "Редактирование поста")
@@ -105,9 +101,9 @@ public class PostController {
                     + bindingResultConverter.convertBindingResultToString(bindingResult));
         }
 
-        PostDto updatedPostDto = postService.updatePost(postId, postDto);
+        PostDto updatedPostDto = postFacade.updatePost(postId, postDto);
         Long authorId = jwtUtil.getUserIdByJwtHeader(jwtHeader);
-        if (updatedPostDto.getAuthor().equals(userService.getUserById(authorId)
+        if (updatedPostDto.getAuthor().equals(postFacade.getUserById(authorId)
                 .orElseThrow(() -> new UserNotFoundException(authorId)))) {
             return updatedPostDto;
         } else {
@@ -121,7 +117,7 @@ public class PostController {
     public PostDto updatePost(@Parameter(description = "Идентификатор поста")
                               @PathVariable Long postId,
                               @RequestBody PostDto postDto) {
-        return postService.updatePost(postId, postDto);
+        return postFacade.updatePost(postId, postDto);
     }
 
     @Operation(summary = "Удаление поста")
@@ -129,11 +125,11 @@ public class PostController {
     public void deleteMyPost(@Parameter(description = "Bearer header with JWT")
                              @RequestHeader("Authorization") String jwtHeader,
                              @RequestBody PostDeleteDto postDeleteDto) {
-        if (postService.getPostDtoById(postDeleteDto.getPostId())
+        if (postFacade.getPostDtoById(postDeleteDto.getPostId())
                 .orElseThrow(() -> new PostNotFoundException(postDeleteDto.getPostId()))
                 .getAuthor().getId()
                 .equals(jwtUtil.getUserIdByJwtHeader(jwtHeader)))
-            postService.deletePost(postDeleteDto.getPostId());
+            postFacade.deletePost(postDeleteDto.getPostId());
         else
             throw new NotYourPostException("You can't delete other people's posts");
     }
@@ -142,6 +138,6 @@ public class PostController {
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{postId}")
     public void deletePost(@PathVariable Long postId) {
-        postService.deletePost(postId);
+        postFacade.deletePost(postId);
     }
 }

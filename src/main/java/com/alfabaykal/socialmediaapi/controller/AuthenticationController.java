@@ -4,9 +4,8 @@ import com.alfabaykal.socialmediaapi.dto.AuthenticationDto;
 import com.alfabaykal.socialmediaapi.dto.UserRegistrationDto;
 import com.alfabaykal.socialmediaapi.exception.LoginFailedException;
 import com.alfabaykal.socialmediaapi.exception.UserNotCreatedException;
+import com.alfabaykal.socialmediaapi.facade.AuthenticationFacade;
 import com.alfabaykal.socialmediaapi.security.JwtUtil;
-import com.alfabaykal.socialmediaapi.service.RegistrationService;
-import com.alfabaykal.socialmediaapi.service.UserService;
 import com.alfabaykal.socialmediaapi.util.BindingResultConverter;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -25,21 +24,18 @@ import java.util.Map;
 @RequestMapping("/v1/auth")
 public class AuthenticationController {
 
-    private final RegistrationService registrationService;
+    private final AuthenticationFacade authenticationFacade;
     private final BindingResultConverter bindingResultConverter;
     private final JwtUtil jwtUtil;
     private final AuthenticationManager authenticationManager;
-    private final UserService userService;
 
-    public AuthenticationController(RegistrationService registrationService,
+    public AuthenticationController(AuthenticationFacade authenticationFacade,
                                     BindingResultConverter bindingResultConverter,
-                                    JwtUtil jwtUtil, AuthenticationManager authenticationManager,
-                                    UserService userService) {
-        this.registrationService = registrationService;
+                                    JwtUtil jwtUtil, AuthenticationManager authenticationManager) {
+        this.authenticationFacade = authenticationFacade;
         this.bindingResultConverter = bindingResultConverter;
         this.jwtUtil = jwtUtil;
         this.authenticationManager = authenticationManager;
-        this.userService = userService;
     }
 
     @Operation(summary = "Регистрация нового пользователя")
@@ -51,9 +47,9 @@ public class AuthenticationController {
             throw new UserNotCreatedException("User creation failed: " + bindingResultConverter.convertBindingResultToString(bindingResult));
         }
 
-        registrationService.register(userRegistrationDto);
+        authenticationFacade.register(userRegistrationDto);
 
-        Long id = userService.getIdByUsername(userRegistrationDto.getUsername());
+        Long id = authenticationFacade.getUserIdByUsername(userRegistrationDto.getUsername());
 
         return Map.of("jwt-token", jwtUtil.generateToken(id, userRegistrationDto.getUsername()));
 
@@ -77,7 +73,7 @@ public class AuthenticationController {
         }
 
         String username = authenticationDto.getUsername();
-        Long id = userService.getIdByUsername(username);
+        Long id = authenticationFacade.getUserIdByUsername(username);
 
         return Map.of("jwt-token", jwtUtil.generateToken(id, authenticationDto.getUsername()));
 

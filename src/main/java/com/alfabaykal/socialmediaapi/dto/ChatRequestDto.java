@@ -13,10 +13,4 @@ public class ChatRequestDto {
     private UserRelationshipDto sender;
     private UserRelationshipDto receiver;
 
-    public ChatRequestDto(UserRelationshipDto sender, UserRelationshipDto receiver, ChatDto chatDto) {
-        this.sender = sender;
-        this.receiver = receiver;
-        this.chatDto = chatDto;
-    }
-
 }

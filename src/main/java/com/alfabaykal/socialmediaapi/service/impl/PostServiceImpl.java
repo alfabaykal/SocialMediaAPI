@@ -1,13 +1,12 @@
 package com.alfabaykal.socialmediaapi.service.impl;
 
-import com.alfabaykal.socialmediaapi.dto.PostDto;
-import com.alfabaykal.socialmediaapi.dto.UserDto;
-import com.alfabaykal.socialmediaapi.dto.UserRelationshipDto;
 import com.alfabaykal.socialmediaapi.exception.PostNotFoundException;
 import com.alfabaykal.socialmediaapi.exception.UserNotFoundException;
+import com.alfabaykal.socialmediaapi.model.Post;
+import com.alfabaykal.socialmediaapi.model.User;
 import com.alfabaykal.socialmediaapi.repository.PostRepository;
 import com.alfabaykal.socialmediaapi.service.PostService;
-import com.alfabaykal.socialmediaapi.util.EntityDtoConverter;
+import com.alfabaykal.socialmediaapi.service.UserService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -21,54 +20,46 @@ import java.util.Optional;
 public class PostServiceImpl implements PostService {
 
     private final PostRepository postRepository;
-    private final EntityDtoConverter entityDtoConverter;
-    private final UserServiceImpl userServiceImpl;
+    private final UserService userService;
 
-    public PostServiceImpl(PostRepository postRepository, EntityDtoConverter entityDtoConverter, UserServiceImpl userServiceImpl) {
+    public PostServiceImpl(PostRepository postRepository, UserService userService) {
         this.postRepository = postRepository;
-        this.entityDtoConverter = entityDtoConverter;
-        this.userServiceImpl = userServiceImpl;
+        this.userService = userService;
     }
 
-    public List<PostDto> getAllPosts() {
-        return postRepository.findAll().stream()
-                .map(entityDtoConverter::convertPostToPostDto).toList();
+    public List<Post> getAllPosts() {
+        return postRepository.findAll();
     }
 
-    public List<PostDto> getPostsByAuthor(Long userId, Pageable pageable) {
-        return postRepository.findByAuthor(entityDtoConverter.convertUserDtoToUser(userServiceImpl.getUserById(userId)
-                        .orElseThrow(() -> new UserNotFoundException(userId))), pageable).stream()
-                .map(entityDtoConverter::convertPostToPostDto).toList();
+    public List<Post> getPostsByAuthor(Long userId, Pageable pageable) {
+        return postRepository.findByAuthor(userService.getUserById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId)), pageable);
     }
 
-    public Page<PostDto> getFeed(Long userId, Pageable pageable) {
-        UserRelationshipDto userRelationshipDto = userServiceImpl.getUserByIdWithSubscriptions(userId)
+    public Page<Post> getFeed(Long userId, Pageable pageable) {
+        User user = userService.getUserByIdWithSubscriptions(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
-        List<UserDto> subscriptions = entityDtoConverter
-                .convertUserRelationshipDtoToUser(userRelationshipDto).getSubscriptions().stream()
-                .map(entityDtoConverter::convertUserToUserDto).toList();
-        return postRepository.findByAuthorInOrderByCreatedAtDesc(subscriptions.stream()
-                        .map(entityDtoConverter::convertUserDtoToUser).toList(), pageable)
-                .map(entityDtoConverter::convertPostToPostDto);
+
+        List<User> subscriptions = user.getSubscriptions().stream().toList();
+
+        return postRepository.findByAuthorInOrderByCreatedAtDesc(subscriptions, pageable);
+
     }
 
-    public Optional<PostDto> getPostDtoById(Long postId) {
-        return postRepository.findWithAuthorById(postId)
-                .map(entityDtoConverter::convertPostToPostDto);
-    }
-
-    @Transactional
-    public PostDto createPost(PostDto postDto) {
-        return entityDtoConverter
-                .convertPostToPostDto(postRepository.save(entityDtoConverter.convertPostDtoToPost(postDto)));
+    public Optional<Post> getPostById(Long postId) {
+        return postRepository.findWithAuthorById(postId);
     }
 
     @Transactional
-    public PostDto updatePost(Long postId, PostDto postDto) {
+    public Post createPost(Post post) {
+        return postRepository.save(post);
+    }
+
+    @Transactional
+    public Post updatePost(Long postId, Post post) {
         if (postRepository.existsById(postId)) {
-            postDto.setId(postId);
-            return entityDtoConverter
-                    .convertPostToPostDto(postRepository.save(entityDtoConverter.convertPostDtoToPost(postDto)));
+            post.setId(postId);
+            return postRepository.save(post);
         } else {
             throw new PostNotFoundException(postId);
         }

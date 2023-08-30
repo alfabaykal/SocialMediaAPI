@@ -1,12 +1,9 @@
 package com.alfabaykal.socialmediaapi.service.impl;
 
-import com.alfabaykal.socialmediaapi.dto.UserDto;
-import com.alfabaykal.socialmediaapi.dto.UserRegistrationDto;
-import com.alfabaykal.socialmediaapi.dto.UserRelationshipDto;
 import com.alfabaykal.socialmediaapi.exception.UserNotFoundException;
+import com.alfabaykal.socialmediaapi.model.User;
 import com.alfabaykal.socialmediaapi.repository.UserRepository;
 import com.alfabaykal.socialmediaapi.service.UserService;
-import com.alfabaykal.socialmediaapi.util.EntityDtoConverter;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,102 +15,85 @@ import java.util.Optional;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-    private final EntityDtoConverter entityDtoConverter;
 
-    public UserServiceImpl(UserRepository userRepository, EntityDtoConverter entityDtoConverter) {
+    public UserServiceImpl(UserRepository userRepository) {
         this.userRepository = userRepository;
-        this.entityDtoConverter = entityDtoConverter;
     }
 
-    public List<UserDto> getAllUsers() {
-        return userRepository.findAll().stream()
-                .map(entityDtoConverter::convertUserToUserDto).toList();
+    public List<User> getAllUsers() {
+        return userRepository.findAll().stream().toList();
     }
 
-    public Long getIdByUsername(String username) {
+    public Long getUserIdByUsername(String username) {
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> new UserNotFoundException(username)).getId();
     }
 
-    public Optional<UserDto> getUserById(Long id) {
-        return userRepository.findById(id)
-                .map(entityDtoConverter::convertUserToUserDto);
+    public Optional<User> getUserById(Long id) {
+        return userRepository.findById(id);
     }
 
-    public Optional<UserRelationshipDto> getUserByIdWithFriends(Long id) {
-        return userRepository.findWithFriendsById(id)
-                .map(entityDtoConverter::convertUserToUserRelationshipDto);
+    public Optional<User> getUserByIdWithFriends(Long id) {
+        return userRepository.findWithFriendsById(id);
     }
 
-    public Optional<UserRelationshipDto> getUserByIdWithSubscriptions(Long id) {
-        return userRepository.findWithSubscriptionsById(id)
-                .map(entityDtoConverter::convertUserToUserRelationshipDto);
+    public Optional<User> getUserByIdWithSubscriptions(Long id) {
+        return userRepository.findWithSubscriptionsById(id);
     }
 
-    public Optional<UserRelationshipDto> getUserByIdWithSubscribers(Long id) {
-        return userRepository.findWithSubscribersById(id)
-                .map(entityDtoConverter::convertUserToUserRelationshipDto);
+    public Optional<User> getUserByIdWithSubscribers(Long id) {
+        return userRepository.findWithSubscribersById(id);
     }
 
-    public Optional<UserRelationshipDto> getUserByIdWithSentFriendRequests(Long id) {
-        return userRepository.findWithSentFriendRequestsById(id)
-                .map(entityDtoConverter::convertUserToUserRelationshipDto);
+    public Optional<User> getUserByIdWithSentFriendRequests(Long id) {
+        return userRepository.findWithSentFriendRequestsById(id);
     }
 
-    public Optional<UserRelationshipDto> getUserByIdWithReceivedFriendRequests(Long id) {
-        return userRepository.findWithReceivedFriendRequestsById(id)
-                .map(entityDtoConverter::convertUserToUserRelationshipDto);
+    public Optional<User> getUserByIdWithReceivedFriendRequests(Long id) {
+        return userRepository.findWithReceivedFriendRequestsById(id);
     }
 
-    public Optional<UserRelationshipDto> getUserByIdWithSubscriptionsAndSentFriendRequests(Long id) {
-        return userRepository.findWithSubscriptionsAndSentFriendRequestsById(id)
-                .map(entityDtoConverter::convertUserToUserRelationshipDto);
+    public Optional<User> getUserByIdWithSubscriptionsAndSentFriendRequests(Long id) {
+        return userRepository.findWithSubscriptionsAndSentFriendRequestsById(id);
     }
 
-    public Optional<UserRelationshipDto> getUserByIdWithSubscribersAndReceivedFriendRequests(Long id) {
-        return userRepository.findWithSubscribersAndReceivedFriendRequestsById(id)
-                .map(entityDtoConverter::convertUserToUserRelationshipDto);
+    public Optional<User> getUserByIdWithSubscribersAndReceivedFriendRequests(Long id) {
+        return userRepository.findWithSubscribersAndReceivedFriendRequestsById(id);
     }
 
-    public Optional<UserRelationshipDto> getUserByIdWithSubscribersAndSentFriendRequestsAndFriends(Long id) {
-        return userRepository.findWithSubscribersAndSentFriendRequestsAndFriendsById(id)
-                .map(entityDtoConverter::convertUserToUserRelationshipDto);
+    public Optional<User> getUserByIdWithSubscribersAndSentFriendRequestsAndFriends(Long id) {
+        return userRepository.findWithSubscribersAndSentFriendRequestsAndFriendsById(id);
     }
 
-    public Optional<UserRelationshipDto> getUserByIdWithSubscriptionsAndReceivedFriendRequestsAndFriends(Long id) {
-        return userRepository.findWithSubscriptionsAndReceivedFriendRequestsAndFriendsById(id)
-                .map(entityDtoConverter::convertUserToUserRelationshipDto);
+    public Optional<User> getUserByIdWithSubscriptionsAndReceivedFriendRequestsAndFriends(Long id) {
+        return userRepository.findWithSubscriptionsAndReceivedFriendRequestsAndFriendsById(id);
     }
 
-    public Optional<UserRelationshipDto> getUserByIdWithSubscriptionsAndFriends(Long id) {
-        return userRepository.findWithSubscriptionsAndFriendsById(id)
-                .map(entityDtoConverter::convertUserToUserRelationshipDto);
+    public Optional<User> getUserByIdWithSubscriptionsAndFriends(Long id) {
+        return userRepository.findWithSubscriptionsAndFriendsById(id);
     }
 
     @Transactional
-    public void save(UserRelationshipDto userRelationshipDto) {
-        userRepository.save(entityDtoConverter.convertUserRelationshipDtoToUser(userRelationshipDto));
+    public void save(User user) {
+        userRepository.save(user);
     }
 
     @Transactional
-    public void save(UserRegistrationDto userRegistrationDto) {
-        userRepository.save(entityDtoConverter.convertUserRegistrationDtoToUser(userRegistrationDto));
-    }
-
-    @Transactional
-    public UserDto updateUser(Long id, UserRegistrationDto userRegistrationDto) {
-        if (userRepository.existsById(id))
-            userRegistrationDto.setId(id);
-
-        return entityDtoConverter
-                .convertUserToUserDto(userRepository.save(entityDtoConverter
-                        .convertUserRegistrationDtoToUser(userRegistrationDto)));
+    public User updateUser(Long id, User user) {
+        if (userRepository.existsById(id)) {
+            user.setId(id);
+            return user;
+        } else {
+            throw new UserNotFoundException(id);
+        }
     }
 
     @Transactional
     public void deleteUser(Long id) {
         if (userRepository.existsById(id))
             userRepository.deleteById(id);
+        else
+            throw new UserNotFoundException(id);
     }
 
 }

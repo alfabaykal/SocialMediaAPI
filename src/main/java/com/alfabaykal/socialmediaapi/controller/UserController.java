@@ -4,8 +4,8 @@ import com.alfabaykal.socialmediaapi.dto.UserDto;
 import com.alfabaykal.socialmediaapi.dto.UserRegistrationDto;
 import com.alfabaykal.socialmediaapi.exception.UserNotFoundException;
 import com.alfabaykal.socialmediaapi.exception.UserNotUpdatedException;
+import com.alfabaykal.socialmediaapi.facade.UserFacade;
 import com.alfabaykal.socialmediaapi.security.JwtUtil;
-import com.alfabaykal.socialmediaapi.service.UserService;
 import com.alfabaykal.socialmediaapi.util.BindingResultConverter;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
@@ -24,16 +24,16 @@ import java.util.List;
 @RequestMapping("/v1/users")
 public class UserController {
 
-    private final UserService userService;
+    private final UserFacade userFacade;
     private final BindingResultConverter bindingResultConverter;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
 
-    public UserController(UserService userService,
+    public UserController(UserFacade userFacade,
                           BindingResultConverter bindingResultConverter,
                           PasswordEncoder passwordEncoder,
                           JwtUtil jwtUtil) {
-        this.userService = userService;
+        this.userFacade = userFacade;
         this.bindingResultConverter = bindingResultConverter;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
@@ -42,14 +42,14 @@ public class UserController {
     @Operation(summary = "Получение списка всех пользователей")
     @GetMapping
     public List<UserDto> getAllUsers() {
-        return userService.getAllUsers();
+        return userFacade.getAllUsers();
     }
 
     @Operation(summary = "Просмотр профиля пользователя")
     @GetMapping("/{id}")
     public UserDto getUserById(@Parameter(description = "Идентификатор пользователя")
                                @PathVariable Long id) {
-        return userService.getUserById(id)
+        return userFacade.getUserById(id)
                 .orElseThrow(() -> new UserNotFoundException(id));
     }
 
@@ -64,7 +64,7 @@ public class UserController {
                     + bindingResultConverter.convertBindingResultToString(bindingResult));
         }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        return userService.updateUser(id, user);
+        return userFacade.updateUser(id, user);
     }
 
     @Operation(summary = "Редактировать аккаунт")
@@ -78,21 +78,21 @@ public class UserController {
                     + bindingResultConverter.convertBindingResultToString(bindingResult));
         }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        return userService.updateUser(jwtUtil.getUserIdByJwtHeader(jwtHeader), user);
+        return userFacade.updateUser(jwtUtil.getUserIdByJwtHeader(jwtHeader), user);
     }
 
     @Hidden
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public void deleteUser(@PathVariable Long id) {
-        userService.deleteUser(id);
+        userFacade.deleteUser(id);
     }
 
     @Operation(summary = "Удаление профиля")
     @DeleteMapping()
     public void deleteMyAccount(@Parameter(description = "Bearer header with JWT")
                                 @RequestHeader("Authorization") String jwtHeader) {
-        userService.deleteUser(jwtUtil.getUserIdByJwtHeader(jwtHeader));
+        userFacade.deleteUser(jwtUtil.getUserIdByJwtHeader(jwtHeader));
     }
 
 }

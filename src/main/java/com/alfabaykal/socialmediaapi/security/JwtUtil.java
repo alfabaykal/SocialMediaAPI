@@ -1,7 +1,7 @@
 package com.alfabaykal.socialmediaapi.security;
 
-import com.alfabaykal.socialmediaapi.dto.UserDto;
 import com.alfabaykal.socialmediaapi.exception.UserNotFoundException;
+import com.alfabaykal.socialmediaapi.model.User;
 import com.alfabaykal.socialmediaapi.service.UserService;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
@@ -58,7 +58,7 @@ public class JwtUtil {
 
     public Long getUserIdByJwtHeader(String authHeader) throws JWTVerificationException {
         JwtPayload jwtPayload = validateTokenAndRetrieveClaims(authHeader.substring(7));
-        Optional<UserDto> userDtoOptional = userService.getUserById(jwtPayload.id);
+        Optional<User> userDtoOptional = userService.getUserById(jwtPayload.id);
 
         if (userDtoOptional.isPresent()) {
             return userDtoOptional.get().getId();

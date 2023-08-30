@@ -1,6 +1,6 @@
 package com.alfabaykal.socialmediaapi.service.impl;
 
-import com.alfabaykal.socialmediaapi.dto.UserRegistrationDto;
+import com.alfabaykal.socialmediaapi.model.User;
 import com.alfabaykal.socialmediaapi.service.RegistrationService;
 import com.alfabaykal.socialmediaapi.service.UserService;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,9 +22,9 @@ public class RegistrationServiceImpl implements RegistrationService {
     }
 
     @Transactional
-    public void register(UserRegistrationDto userRegistrationDto) {
-        userRegistrationDto.setPassword(passwordEncoder.encode(userRegistrationDto.getPassword()));
-        userRegistrationDto.setRole(DEFAULT_ROLE);
-        userService.save(userRegistrationDto);
+    public void register(User user) {
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setRole(DEFAULT_ROLE);
+        userService.save(user);
     }
 }

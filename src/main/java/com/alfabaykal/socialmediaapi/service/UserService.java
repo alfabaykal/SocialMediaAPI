@@ -1,45 +1,43 @@
 package com.alfabaykal.socialmediaapi.service;
 
-import com.alfabaykal.socialmediaapi.dto.UserDto;
-import com.alfabaykal.socialmediaapi.dto.UserRegistrationDto;
-import com.alfabaykal.socialmediaapi.dto.UserRelationshipDto;
+import com.alfabaykal.socialmediaapi.model.User;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface UserService {
 
-    List<UserDto> getAllUsers();
+    List<User> getAllUsers();
 
-    Long getIdByUsername(String username);
+    Long getUserIdByUsername(String username);
 
-    Optional<UserDto> getUserById(Long id);
+    Optional<User> getUserById(Long id);
 
-    Optional<UserRelationshipDto> getUserByIdWithFriends(Long id);
+    Optional<User> getUserByIdWithFriends(Long id);
 
-    Optional<UserRelationshipDto> getUserByIdWithSubscriptions(Long id);
+    Optional<User> getUserByIdWithSubscriptions(Long id);
 
-    Optional<UserRelationshipDto> getUserByIdWithSubscribers(Long id);
+    Optional<User> getUserByIdWithSubscribers(Long id);
 
-    Optional<UserRelationshipDto> getUserByIdWithSentFriendRequests(Long id);
+    Optional<User> getUserByIdWithSentFriendRequests(Long id);
 
-    Optional<UserRelationshipDto> getUserByIdWithReceivedFriendRequests(Long id);
+    Optional<User> getUserByIdWithReceivedFriendRequests(Long id);
 
-    Optional<UserRelationshipDto> getUserByIdWithSubscriptionsAndSentFriendRequests(Long id);
+    Optional<User> getUserByIdWithSubscriptionsAndSentFriendRequests(Long id);
 
-    Optional<UserRelationshipDto> getUserByIdWithSubscribersAndReceivedFriendRequests(Long id);
+    Optional<User> getUserByIdWithSubscribersAndReceivedFriendRequests(Long id);
 
-    Optional<UserRelationshipDto> getUserByIdWithSubscribersAndSentFriendRequestsAndFriends(Long id);
+    Optional<User> getUserByIdWithSubscribersAndSentFriendRequestsAndFriends(Long id);
 
-    Optional<UserRelationshipDto> getUserByIdWithSubscriptionsAndReceivedFriendRequestsAndFriends(Long id);
+    Optional<User> getUserByIdWithSubscriptionsAndReceivedFriendRequestsAndFriends(Long id);
 
-    Optional<UserRelationshipDto> getUserByIdWithSubscriptionsAndFriends(Long id);
+    Optional<User> getUserByIdWithSubscriptionsAndFriends(Long id);
 
-    void save(UserRelationshipDto userRelationshipDto);
+//    void save(UserRelationshipDto userRelationshipDto);
 
-    void save(UserRegistrationDto userRegistrationDto);
+    void save(User user);
 
-    UserDto updateUser(Long id, UserRegistrationDto userRegistrationDto);
+    User updateUser(Long id, User user);
 
     void deleteUser(Long id);
 
