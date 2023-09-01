@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
-@Tag(name = "Вход и регистрация", description = "Методы для регистрации и утентификации")
+@Tag(name = "Вход и регистрация", description = "Методы для регистрации и аутентификации")
 @RestController
 @RequestMapping("/v1/auth")
 public class AuthenticationController {

@@ -2,6 +2,8 @@ package com.alfabaykal.socialmediaapi.service.impl;
 
 import com.alfabaykal.socialmediaapi.exception.UserNotFoundException;
 import com.alfabaykal.socialmediaapi.model.User;
+import com.alfabaykal.socialmediaapi.repository.ChatUsersRepository;
+import com.alfabaykal.socialmediaapi.repository.FriendshipRepository;
 import com.alfabaykal.socialmediaapi.repository.UserRepository;
 import com.alfabaykal.socialmediaapi.service.UserService;
 import org.springframework.stereotype.Service;
@@ -15,9 +17,14 @@ import java.util.Optional;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final FriendshipRepository friendshipRepository;
+    private final ChatUsersRepository chatUsersRepository;
 
-    public UserServiceImpl(UserRepository userRepository) {
+    public UserServiceImpl(UserRepository userRepository,
+                           FriendshipRepository friendshipRepository, ChatUsersRepository chatUsersRepository) {
         this.userRepository = userRepository;
+        this.friendshipRepository = friendshipRepository;
+        this.chatUsersRepository = chatUsersRepository;
     }
 
     public List<User> getAllUsers() {
@@ -80,19 +87,21 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     public User updateUser(Long id, User user) {
-        if (userRepository.existsById(id)) {
-            user.setId(id);
-            return user;
-        } else {
-            throw new UserNotFoundException(id);
-        }
+        User updatedUser = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException(id));
+        updatedUser.setUsername(user.getUsername());
+        updatedUser.setEmail(user.getEmail());
+
+        return userRepository.save(updatedUser);
     }
 
     @Transactional
     public void deleteUser(Long id) {
-        if (userRepository.existsById(id))
+        if (userRepository.existsById(id)) {
+            friendshipRepository.deleteAllByUserId(id);
+            chatUsersRepository.deleteAllByUserId(id);
             userRepository.deleteById(id);
-        else
+        } else
             throw new UserNotFoundException(id);
     }
 
