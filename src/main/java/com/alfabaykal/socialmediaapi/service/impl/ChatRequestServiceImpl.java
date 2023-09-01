@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 @Transactional(readOnly = true)
@@ -90,6 +91,14 @@ public class ChatRequestServiceImpl implements ChatRequestService {
             chatRequestRepository.deleteById(chatRequestId);
         } else
             throw new NotYourChatRequestException();
+    }
+
+    @Override
+    public Optional<ChatRequest> getChatRequestBySenderIdAndReceiverId(Long senderId, Long receiverId) {
+        return chatRequestRepository.findBySenderAndReceiver(userService.getUserById(senderId)
+                .orElseThrow(() -> new UserNotFoundException(senderId)),
+                userService.getUserById(receiverId)
+                        .orElseThrow(() -> new UserNotFoundException(receiverId)));
     }
 
     private boolean alreadySent(User sender, User receiver) {
